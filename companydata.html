@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaritaSource — B2B Recycled Materials Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D0F0E;
+  --bg2: #131715;
+  --bg3: #1A1E1C;
+  --bg4: #222826;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --green: #3DBA7E;
+  --green-dim: #2a8a5a;
+  --green-glow: rgba(61,186,126,0.15);
+  --amber: #F5A623;
+  --amber-dim: rgba(245,166,35,0.15);
+  --red: #E05252;
+  --red-dim: rgba(224,82,82,0.12);
+  --blue: #4A9EFF;
+  --text: #E8EDE9;
+  --text2: #9AADA0;
+  --text3: #5A6B61;
+  --white: #ffffff;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-green: 0 0 40px rgba(61,186,126,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* PAGE SYSTEM */
+.page { display:none; min-height:100vh; animation: fadeIn 0.4s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius:3px; }
+
+/* ─── TOAST ─── */
+#toast {
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
+  background: var(--bg3); border:1px solid var(--border2);
+  color:var(--text); padding:14px 24px; border-radius:40px;
+  font-size:0.88rem; font-weight:500; box-shadow:var(--shadow);
+  z-index:9999; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap; opacity:0;
+}
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+#toast.success { border-color:var(--green); color:var(--green); }
+#toast.error { border-color:var(--red); color:var(--red); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.7); z-index:800;
+  align-items:center; justify-content:center;
+  backdrop-filter:blur(6px);
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--bg3); border:1px solid var(--border2);
+  border-radius:20px; padding:2.5rem; width:90%; max-width:500px;
+  box-shadow:var(--shadow); animation:fadeIn 0.3s ease;
+}
+.modal-close {
+  position:absolute; top:1rem; right:1rem;
+  background:none; border:none; color:var(--text2);
+  font-size:1.3rem; cursor:pointer; padding:4px 10px;
+  border-radius:8px; transition:all 0.2s;
+}
+.modal-close:hover { background:var(--bg4); color:var(--text); }
+
+/* ─── NAV ─── */
+nav {
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  height:64px; padding:0 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:200;
+}
+.nav-logo {
+  font-family:'Bebas Neue',sans-serif; font-size:1.5rem;
+  letter-spacing:2px; color:var(--text);
+  cursor:pointer; display:flex; align-items:center; gap:10px;
+}
+.nav-logo a {
+  text-decoration: none; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo a:hover { color: var(--green); }
+.nav-logo .dot { color:var(--green); }
+.nav-links { display:flex; align-items:center; gap:6px; }
+.nav-btn {
+  background:none; border:none; color:var(--text2);
+  font-family:'Outfit',sans-serif; font-size:0.88rem; font-weight:500;
+  cursor:pointer; padding:8px 16px; border-radius:8px;
+  transition:all 0.2s;
+}
+.nav-btn:hover { background:var(--bg4); color:var(--text); }
+.nav-btn.active-link { color:var(--green); }
+.nav-company-badge {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg4); border:1px solid var(--border2);
+  border-radius:40px; padding:5px 14px 5px 6px;
+}
+.nav-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--green-dim); color:var(--white);
+  font-family:'Bebas Neue'; font-size:0.95rem; letter-spacing:1px;
+  display:flex; align-items:center; justify-content:center;
+}
+.nav-company-name { font-size:0.85rem; font-weight:600; color:var(--text); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.status-dot { width:7px; height:7px; border-radius:50%; background:var(--green); flex-shrink:0; box-shadow:0 0 6px var(--green); }
+
+/* ─── BUTTONS ─── */
+.btn {
+  font-family:'Outfit',sans-serif; font-weight:600;
+  padding:11px 24px; border-radius:10px; border:none;
+  cursor:pointer; font-size:0.9rem;
+  transition:all 0.22s; display:inline-flex; align-items:center; gap:8px;
+}
+.btn-green { background:var(--green); color:#fff; box-shadow:0 4px 20px rgba(61,186,126,0.25); }
+.btn-green:hover { background:#2fa06a; transform:translateY(-1px); box-shadow:0 6px 24px rgba(61,186,126,0.35); }
+.btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border2); }
+.btn-outline:hover { border-color:var(--green); color:var(--green); background:var(--green-glow); }
+.btn-ghost { background:var(--bg4); color:var(--text); }
+.btn-ghost:hover { background:var(--bg3); }
+.btn-sm { padding:7px 16px; font-size:0.82rem; border-radius:8px; }
+.btn-danger { background:transparent; border:1px solid var(--red); color:var(--red); }
+.btn-danger:hover { background:var(--red-dim); }
+.btn:disabled { opacity:0.4; cursor:not-allowed; transform:none !important; }
+
+/* ─── FORM ─── */
+.form-group { margin-bottom:1.2rem; }
+.form-label {
+  display:block; font-size:0.78rem; font-weight:600;
+  color:var(--text3); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:7px;
+}
+.form-input {
+  width:100%; padding:11px 15px;
+  background:var(--bg4); border:1px solid var(--border2);
+  border-radius:10px; font-family:'Outfit',sans-serif; font-size:0.9rem;
+  color:var(--text); outline:none; transition:border-color 0.2s;
+}
+.form-input:focus { border-color:var(--green); }
+.form-input::placeholder { color:var(--text3); }
+select.form-input option { background:var(--bg3); }
+.form-error { color:var(--red); font-size:0.8rem; margin-top:5px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
+
+/* ─── BADGE ─── */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:20px;
+  font-size:0.75rem; font-weight:600;
+}
+.badge-green { background:rgba(61,186,126,0.15); color:var(--green); border:1px solid rgba(61,186,126,0.25); }
+.badge-amber { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
+.badge-red { background:var(--red-dim); color:var(--red); border:1px solid rgba(224,82,82,0.25); }
+.badge-blue { background:rgba(74,158,255,0.12); color:var(--blue); border:1px solid rgba(74,158,255,0.25); }
+.badge-gray { background:var(--bg4); color:var(--text2); border:1px solid var(--border2); }
+
+/* ─── SECTION / CARD ─── */
+.card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:1.5rem;
+  transition:border-color 0.2s;
+}
+.card:hover { border-color:var(--border2); }
+.section-head { margin-bottom:1.5rem; }
+.section-head h2 { font-family:'Bebas Neue'; font-size:1.6rem; letter-spacing:1px; color:var(--text); }
+.section-head p { color:var(--text2); font-size:0.88rem; margin-top:4px; }
+
+/* ─── SIDEBAR LAYOUT ─── */
+.app-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 64px); }
+@media(max-width:900px){ .app-layout { grid-template-columns:1fr; } }
+
+.sidebar {
+  background:var(--bg2); border-right:1px solid var(--border);
+  padding:1.5rem 1rem;
+}
+@media(max-width:900px){ .sidebar { display:none; } }
+.sidebar-menu { display:flex; flex-direction:column; gap:4px; }
+.sidebar-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 14px; border-radius:10px;
+  color:var(--text2); font-size:0.88rem; font-weight:500;
+  cursor:pointer; transition:all 0.2s;
+  border:1px solid transparent;
+}
+.sidebar-item:hover { background:var(--bg4); color:var(--text); }
+.sidebar-item.active { background:var(--green-glow); color:var(--green); border-color:rgba(61,186,126,0.2); }
+.sidebar-icon { font-size:1rem; width:20px; text-align:center; }
+.sidebar-divider { height:1px; background:var(--border); margin:12px 0; }
+
+.main-content { padding:2rem; overflow-y:auto; }
+@media(max-width:600px){ .main-content { padding:1rem; } }
+
+/* ─── LOGIN PAGE ─── */
+.login-page {
+  min-height:100vh;
+  display:grid; grid-template-columns:1fr 1fr;
+  background:var(--bg);
+}
+@media(max-width:768px){ .login-page { grid-template-columns:1fr; } }
+.login-left {
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; justify-content:center;
+  padding:4rem 3.5rem; position:relative; overflow:hidden;
+}
+@media(max-width:768px){ .login-left { display:none; } }
+.login-left::before {
+  content:''; position:absolute;
+  top:-120px; left:-120px; width:400px; height:400px;
+  border-radius:50%; background:radial-gradient(circle, rgba(61,186,126,0.08) 0%, transparent 70%);
+}
+.login-left::after {
+  content:''; position:absolute;
+  bottom:-80px; right:-80px; width:300px; height:300px;
+  border-radius:50%; background:radial-gradient(circle, rgba(61,186,126,0.05) 0%, transparent 70%);
+}
+.login-brand { font-family:'Bebas Neue'; font-size:2.2rem; letter-spacing:3px; margin-bottom:3rem; position:relative; z-index:1; }
+.login-brand .dot { color:var(--green); }
+.login-headline { font-family:'Bebas Neue'; font-size:3.2rem; line-height:1.05; margin-bottom:1.5rem; position:relative; z-index:1; }
+.login-headline em { color:var(--green); font-style:normal; }
+.login-sub { color:var(--text2); line-height:1.7; font-size:0.95rem; max-width:380px; position:relative; z-index:1; margin-bottom:3rem; }
+.login-stats { display:grid; grid-template-columns:1fr 1fr; gap:1rem; position:relative; z-index:1; }
+.login-stat {
+  background:var(--bg3); border:1px solid var(--border2); border-radius:14px; padding:1.2rem;
+}
+.login-stat-num { font-family:'Bebas Neue'; font-size:1.6rem; color:var(--green); letter-spacing:1px; }
+.login-stat-label { font-size:0.78rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+
+.login-right {
+  display:flex; align-items:center; justify-content:center;
+  padding:3rem 2rem;
+}
+.login-card {
+  width:100%; max-width:420px;
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:24px; padding:3rem 2.5rem;
+  box-shadow:var(--shadow), var(--shadow-green);
+}
+.login-card h2 { font-family:'Bebas Neue'; font-size:2rem; letter-spacing:1.5px; margin-bottom:0.4rem; }
+.login-card p { color:var(--text2); font-size:0.88rem; margin-bottom:2rem; }
+.login-tabs { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--border2); border-radius:10px; overflow:hidden; margin-bottom:2rem; }
+.login-tab { padding:9px; text-align:center; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text2); transition:all 0.2s; background:none; border:none; font-family:'Outfit',sans-serif; }
+.login-tab.active { background:var(--green); color:#fff; }
+.login-demo { background:var(--bg4); border-radius:10px; padding:10px 14px; margin-top:1.5rem; font-size:0.8rem; color:var(--text2); line-height:1.6; }
+.login-demo strong { color:var(--text); }
+
+/* ─── DASHBOARD CARDS ─── */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.kpi-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:1.4rem; position:relative; overflow:hidden;
+  transition:border-color 0.2s;
+}
+.kpi-card:hover { border-color:var(--border2); }
+.kpi-label { font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--text3); margin-bottom:0.6rem; }
+.kpi-num { font-family:'Bebas Neue'; font-size:2.2rem; letter-spacing:1px; line-height:1; }
+.kpi-sub { font-size:0.78rem; color:var(--text2); margin-top:6px; }
+.kpi-accent { position:absolute; top:0; right:0; width:60px; height:60px; border-radius:0 0 0 60px; opacity:0.15; }
+
+/* ─── MATERIAL CATALOGUE ─── */
+.catalogue-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.2rem; }
+.mat-card {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; overflow:hidden;
+  cursor:pointer; transition:all 0.25s;
+}
+.mat-card:hover { border-color:var(--green); transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+.mat-card-header { padding:1.2rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.mat-icon-box {
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; flex-shrink:0;
+}
+.mat-card-name { font-weight:700; font-size:0.95rem; }
+.mat-card-cat { font-size:0.75rem; color:var(--text3); margin-top:2px; }
+.mat-card-body { padding:1.2rem 1.4rem; }
+.mat-spec { display:flex; justify-content:space-between; font-size:0.82rem; padding:5px 0; border-bottom:1px solid var(--border); }
+.mat-spec:last-of-type { border-bottom:none; }
+.mat-spec-label { color:var(--text2); }
+.mat-spec-val { font-weight:600; color:var(--text); }
+.mat-card-footer { padding:0.8rem 1.4rem 1.2rem; }
+.mat-avail-bar { height:5px; background:var(--bg4); border-radius:3px; margin-top:6px; overflow:hidden; }
+.mat-avail-fill { height:100%; border-radius:3px; background:var(--green); transition:width 0.5s; }
+
+/* ─── REQUEST FORM ─── */
+.req-form-wrap { max-width:760px; }
+.step-bar { display:flex; align-items:center; gap:0; margin-bottom:2.5rem; }
+.step-item { display:flex; align-items:center; gap:8px; }
+.step-num {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--bg4); border:2px solid var(--border2);
+  color:var(--text2); display:flex; align-items:center; justify-content:center;
+  font-size:0.8rem; font-weight:700; flex-shrink:0; transition:all 0.3s;
+}
+.step-num.active { background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 0 12px rgba(61,186,126,0.4); }
+.step-num.done { background:var(--green-dim); border-color:var(--green-dim); color:#fff; }
+.step-label { font-size:0.82rem; color:var(--text2); }
+.step-label.active { color:var(--green); font-weight:600; }
+.step-line { flex:1; height:2px; background:var(--border2); margin:0 12px; min-width:30px; }
+.step-line.done { background:var(--green-dim); }
+
+/* ─── REQUESTS TABLE ─── */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.87rem; }
+thead th {
+  background:var(--bg3); color:var(--text3);
+  font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.8px;
+  padding:11px 16px; text-align:left; border-bottom:1px solid var(--border);
+}
+tbody tr { border-bottom:1px solid var(--border); transition:background 0.15s; }
+tbody tr:hover { background:var(--bg3); }
+tbody td { padding:13px 16px; color:var(--text); vertical-align:middle; }
+tbody tr:last-child { border-bottom:none; }
+.req-id { font-family:'Bebas Neue'; letter-spacing:1px; font-size:0.9rem; color:var(--green); }
+
+/* ─── PROFILE ─── */
+.profile-header {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; padding:2rem;
+  display:flex; align-items:center; gap:1.5rem;
+  margin-bottom:2rem;
+}
+.profile-avatar-large {
+  width:72px; height:72px; border-radius:50%;
+  background:var(--green-dim); color:#fff;
+  font-family:'Bebas Neue'; font-size:1.8rem; letter-spacing:2px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.profile-info h3 { font-family:'Bebas Neue'; font-size:1.5rem; letter-spacing:1px; }
+.profile-info p { color:var(--text2); font-size:0.88rem; margin-top:4px; }
+.profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+@media(max-width:600px){ .profile-grid { grid-template-columns:1fr; } }
+.info-field { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; }
+.info-field-label { font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--text3); margin-bottom:5px; }
+.info-field-val { font-size:0.92rem; font-weight:500; color:var(--text); }
+
+/* TICKER */
+.ticker-strip {
+  background:var(--bg3); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:10px 0; overflow:hidden; white-space:nowrap;
+}
+.ticker-inner { display:inline-block; animation:ticker 28s linear infinite; }
+.ticker-inner:hover { animation-play-state:paused; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.ticker-item { display:inline-flex; align-items:center; gap:8px; margin-right:40px; font-size:0.8rem; color:var(--text2); }
+.ticker-item .t-name { color:var(--text); font-weight:600; }
+.ticker-item .t-up { color:var(--green); }
+.ticker-item .t-down { color:var(--red); }
+
+/* QUICK SELECT CHIPS */
+.chip-group { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.chip {
+  padding:6px 14px; border-radius:20px;
+  background:var(--bg4); border:1px solid var(--border2);
+  color:var(--text2); font-size:0.82rem; font-weight:500;
+  cursor:pointer; transition:all 0.18s;
+}
+.chip:hover, .chip.selected { background:var(--green-glow); border-color:var(--green); color:var(--green); }
+
+.divider { height:1px; background:var(--border); margin:1.5rem 0; }
+.text-green { color:var(--green); }
+.text-amber { color:var(--amber); }
+.text-red { color:var(--red); }
+.text-muted { color:var(--text2); }
+.fw-bold { font-weight:700; }
+.font-display { font-family:'Bebas Neue'; letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderModal" style="position:fixed;">
+  <div class="modal-box" style="position:relative;max-width:560px;">
+    <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
+    <h3 class="font-display" style="font-size:1.4rem;margin-bottom:0.3rem;" id="modalTitle">Request Details</h3>
+    <p class="text-muted" style="font-size:0.85rem;margin-bottom:1.5rem;" id="modalSubtitle"></p>
+    <div id="modalBody"></div>
+    <div style="display:flex;gap:0.8rem;margin-top:1.8rem;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeModal('orderModal')">Close</button>
+      <button class="btn btn-green" style="flex:1;" id="modalAction">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL CONFIRM MODAL -->
+<div class="modal-overlay" id="cancelModal" style="position:fixed;">
+  <div class="modal-box" style="position:relative;max-width:420px;text-align:center;">
+    <button class="modal-close" onclick="closeModal('cancelModal')">✕</button>
+    <div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>
+    <h3 class="font-display" style="font-size:1.4rem;margin-bottom:0.5rem;">Cancel Request?</h3>
+    <p class="text-muted" style="font-size:0.88rem;margin-bottom:1.8rem;">This will cancel the selected request. This action cannot be undone.</p>
+    <div style="display:flex;gap:0.8rem;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeModal('cancelModal')">Keep It</button>
+      <button class="btn btn-danger" style="flex:1;" id="confirmCancelBtn">Yes, Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================== LOGIN PAGE =============================== -->
+<div class="page active" id="page-login">
+  <div class="login-page">
+    <div class="login-left">
+      <div class="login-brand">HARITA<span class="dot">SOURCE</span></div>
+      <h1 class="login-headline">
+        RECYCLED MATERIALS<br>
+        FOR YOUR<br>
+        <em>MANUFACTURING</em>
+      </h1>
+      <p class="login-sub">India's first B2B platform connecting manufacturers directly to certified recycled raw material suppliers. Cut costs, meet ESG targets, build sustainably.</p>
+      <div class="login-stats">
+        <div class="login-stat">
+          <div class="login-stat-num">840+</div>
+          <div class="login-stat-label">Verified Companies</div>
+        </div>
+        <div class="login-stat">
+          <div class="login-stat-num">12 Types</div>
+          <div class="login-stat-label">Recycled Materials</div>
+        </div>
+        <div class="login-stat">
+          <div class="login-stat-num">₹4.2Cr</div>
+          <div class="login-stat-label">Orders This Month</div>
+        </div>
+        <div class="login-stat">
+          <div class="login-stat-num">48hr</div>
+          <div class="login-stat-label">Avg Dispatch Time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <div class="login-card">
+        <h2>COMPANY LOGIN</h2>
+        <p>Access the recycled materials marketplace</p>
+        <div class="login-tabs">
+          <button class="login-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+          <button class="login-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="login-form">
+          <div class="form-group">
+            <label class="form-label">Company Email</label>
+            <input class="form-input" id="loginEmail" type="email" placeholder="procurement@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="loginPass" type="password" placeholder="••••••••">
+            <div class="form-error" id="loginErr"></div>
+          </div>
+          <button class="btn btn-green" style="width:100%;justify-content:center;" onclick="doLogin()">
+            Sign In →
+          </button>
+          <div class="login-demo">
+            <strong>Demo Credentials:</strong><br>
+            procurement@tatasteels.in / tata@2025<br>
+            orders@relianceinds.in / reliance@2025<br>
+            buying@itcgroup.in / itc@2025
+          </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="register-form" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Company Name</label>
+              <input class="form-input" id="regCompany" placeholder="Acme Industries Ltd.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Industry</label>
+              <select class="form-input" id="regIndustry">
+                <option value="">Select</option>
+                <option>Packaging</option><option>Textiles</option>
+                <option>Automotive</option><option>FMCG</option>
+                <option>Electronics</option><option>Construction</option>
+                <option>Paper & Pulp</option><option>Plastics</option>
+                <option>Metal Manufacturing</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company Email</label>
+            <input class="form-input" id="regEmail" type="email" placeholder="procurement@company.com">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">GST Number</label>
+              <input class="form-input" id="regGST" placeholder="27AAAAA0000A1Z5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <select class="form-input" id="regCity">
+                <option value="">Select</option>
+                <option>Mumbai</option><option>Delhi</option><option>Bengaluru</option>
+                <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+                <option>Ahmedabad</option><option>Kolkata</option><option>Surat</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" id="regPass" type="password" placeholder="Min 8 characters">
+            <div class="form-error" id="regErr"></div>
+          </div>
+          <button class="btn btn-green" style="width:100%;justify-content:center;" onclick="doRegister()">
+            Create Company Account →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================== APP SHELL (all logged-in pages) =============================== -->
+<div class="page" id="page-app">
+  <nav>
+    <a href="index.html" style="text-decoration:none;color:var(--green);margin-right:16px;font-size:0.85rem;" title="Back to portal selector">← PORTALS</a>
+    <div class="nav-logo" onclick="switchView('dashboard')">HARITA<span class="dot">SOURCE</span></div>
+    <div class="nav-links" id="appNavLinks">
+      <button class="nav-btn active-link" onclick="switchView('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="switchView('catalogue')">Materials</button>
+      <button class="nav-btn" onclick="switchView('new-request')">New Request</button>
+      <button class="nav-btn" onclick="switchView('my-requests')">My Requests</button>
+      <div class="nav-company-badge" id="navBadge">
+        <div class="nav-avatar" id="navAv">T</div>
+        <div class="nav-company-name" id="navName">Tata Steels</div>
+        <div class="status-dot"></div>
+      </div>
+      <button class="nav-btn" onclick="doLogout()" style="color:var(--text3);font-size:0.8rem;">Logout</button>
+    </div>
+  </nav>
+
+  <!-- TICKER -->
+  <div class="ticker-strip">
+    <div class="ticker-inner" id="tickerContent"></div>
+  </div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-menu" id="sidebarMenu">
+        <div class="sidebar-item active" data-view="dashboard" onclick="switchView('dashboard')">
+          <span class="sidebar-icon">📊</span> Dashboard
+        </div>
+        <div class="sidebar-item" data-view="catalogue" onclick="switchView('catalogue')">
+          <span class="sidebar-icon">🗃️</span> Material Catalogue
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item" data-view="new-request" onclick="switchView('new-request')">
+          <span class="sidebar-icon">📋</span> New Request
+        </div>
+        <div class="sidebar-item" data-view="my-requests" onclick="switchView('my-requests')">
+          <span class="sidebar-icon">📦</span> My Requests
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item" data-view="profile" onclick="switchView('profile')">
+          <span class="sidebar-icon">🏢</span> Company Profile
+        </div>
+        <div style="flex:1;"></div>
+        <div class="sidebar-item" onclick="doLogout()" style="margin-top:auto;">
+          <span class="sidebar-icon">🚪</span> Logout
+        </div>
+      </div>
+    </aside>
+
+    <!-- VIEWS -->
+    <main class="main-content">
+
+      <!-- DASHBOARD VIEW -->
+      <div id="view-dashboard" class="view">
+        <div class="section-head">
+          <h2 id="dashHeading">GOOD MORNING, TATA STEELS</h2>
+          <p>Here's your procurement overview for today.</p>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Requests</div>
+            <div class="kpi-num text-green" id="kpiTotal">0</div>
+            <div class="kpi-sub">All time</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-num text-amber" id="kpiPending">0</div>
+            <div class="kpi-sub">Awaiting approval</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Fulfilled</div>
+            <div class="kpi-num text-green" id="kpiFulfilled">0</div>
+            <div class="kpi-sub">Delivered to plant</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Volume</div>
+            <div class="kpi-num" id="kpiVolume">0</div>
+            <div class="kpi-sub">Metric tonnes</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Spent</div>
+            <div class="kpi-num text-green" id="kpiSpent">₹0</div>
+            <div class="kpi-sub">Procurement value</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:0.5rem;" id="dashBottom">
+          <div class="card">
+            <h4 class="font-display" style="font-size:1rem;margin-bottom:1rem;letter-spacing:1px;">RECENT REQUESTS</h4>
+            <div id="dashRecentRequests"><p class="text-muted" style="font-size:0.85rem;">No requests yet.</p></div>
+          </div>
+          <div class="card">
+            <h4 class="font-display" style="font-size:1rem;margin-bottom:1rem;letter-spacing:1px;">TOP MATERIALS ORDERED</h4>
+            <div id="dashTopMaterials"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOGUE VIEW -->
+      <div id="view-catalogue" class="view" style="display:none;">
+        <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h2>MATERIAL CATALOGUE</h2>
+            <p>Browse available recycled raw materials. Prices are per metric tonne.</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;" id="catFilters"></div>
+        </div>
+        <div class="catalogue-grid" id="catalogueGrid"></div>
+      </div>
+
+      <!-- NEW REQUEST VIEW -->
+      <div id="view-new-request" class="view" style="display:none;">
+        <div class="section-head">
+          <h2>NEW MATERIAL REQUEST</h2>
+          <p>Submit a procurement request for recycled raw materials.</p>
+        </div>
+        <div class="req-form-wrap">
+          <div class="step-bar" id="stepBar"></div>
+
+          <!-- STEP 1: Select Material -->
+          <div id="req-step-1" class="card" style="margin-bottom:1.5rem;">
+            <h4 class="font-display" style="font-size:1rem;letter-spacing:1px;margin-bottom:1.2rem;">STEP 1 — SELECT MATERIAL</h4>
+            <div class="form-group">
+              <label class="form-label">Material Category</label>
+              <select class="form-input" id="reqCat" onchange="onCatChange()">
+                <option value="">Choose category</option>
+              </select>
+            </div>
+            <div class="form-group" id="reqMatGroup" style="display:none;">
+              <label class="form-label">Material</label>
+              <select class="form-input" id="reqMat" onchange="onMatChange()">
+                <option value="">Choose material</option>
+              </select>
+            </div>
+            <div id="reqMatDetails" style="display:none;"></div>
+          </div>
+
+          <!-- STEP 2: Quantity & Delivery -->
+          <div id="req-step-2" class="card" style="margin-bottom:1.5rem;opacity:0.4;pointer-events:none;">
+            <h4 class="font-display" style="font-size:1rem;letter-spacing:1px;margin-bottom:1.2rem;">STEP 2 — QUANTITY & DELIVERY</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Quantity (Metric Tonnes)</label>
+                <input class="form-input" id="reqQty" type="number" min="1" max="5000" placeholder="e.g. 50" oninput="calcTotal()">
+                <div class="form-error" id="qtyErr"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Required By Date</label>
+                <input class="form-input" id="reqDate" type="date" onchange="calcTotal()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Delivery Location (Plant / Warehouse)</label>
+              <input class="form-input" id="reqLocation" placeholder="e.g. Plot 12, MIDC, Pune - 411018">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Urgency</label>
+              <div class="chip-group" id="urgencyChips">
+                <div class="chip selected" data-val="standard" onclick="selectChip(this,'urgencyChips')">Standard (7–10 days)</div>
+                <div class="chip" data-val="express" onclick="selectChip(this,'urgencyChips')">Express (3–5 days)</div>
+                <div class="chip" data-val="urgent" onclick="selectChip(this,'urgencyChips')">Urgent (24–48 hrs)</div>
+              </div>
+            </div>
+            <div id="totalEstimate" style="display:none;background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-top:0.5rem;">
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text2);margin-bottom:8px;">
+                <span>Unit Price</span><span id="estUnitPrice">—</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text2);margin-bottom:8px;">
+                <span>Quantity</span><span id="estQty">—</span>
+              </div>
+              <div class="divider" style="margin:8px 0;"></div>
+              <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;">
+                <span>Estimated Total</span><span class="text-green" id="estTotal">₹0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Notes & Submit -->
+          <div id="req-step-3" class="card" style="margin-bottom:1.5rem;opacity:0.4;pointer-events:none;">
+            <h4 class="font-display" style="font-size:1rem;letter-spacing:1px;margin-bottom:1.2rem;">STEP 3 — ADDITIONAL NOTES & SUBMIT</h4>
+            <div class="form-group">
+              <label class="form-label">Purity / Quality Grade Required</label>
+              <div class="chip-group" id="gradeChips">
+                <div class="chip selected" data-val="A" onclick="selectChip(this,'gradeChips')">Grade A (Premium)</div>
+                <div class="chip" data-val="B" onclick="selectChip(this,'gradeChips')">Grade B (Standard)</div>
+                <div class="chip" data-val="C" onclick="selectChip(this,'gradeChips')">Grade C (Basic)</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Special Requirements / Notes</label>
+              <textarea class="form-input" id="reqNotes" rows="3" placeholder="e.g. Must be sorted, free from contaminants, baled in 500kg bales..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Internal PO Number (Optional)</label>
+              <input class="form-input" id="reqPO" placeholder="e.g. PO-2025-0842">
+            </div>
+            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+              <button class="btn btn-outline" onclick="resetReqForm()">Clear Form</button>
+              <button class="btn btn-green" id="submitReqBtn" onclick="submitRequest()">Submit Request →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY REQUESTS VIEW -->
+      <div id="view-my-requests" class="view" style="display:none;">
+        <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h2>MY REQUESTS</h2>
+            <p>All material procurement requests from your company account.</p>
+          </div>
+          <button class="btn btn-green btn-sm" onclick="switchView('new-request')">+ New Request</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;" id="reqStatusFilter">
+          <div class="chip selected" data-val="all" onclick="filterRequests('all',this)">All</div>
+          <div class="chip" data-val="Pending" onclick="filterRequests('Pending',this)">Pending</div>
+          <div class="chip" data-val="Approved" onclick="filterRequests('Approved',this)">Approved</div>
+          <div class="chip" data-val="In Transit" onclick="filterRequests('In Transit',this)">In Transit</div>
+          <div class="chip" data-val="Fulfilled" onclick="filterRequests('Fulfilled',this)">Fulfilled</div>
+          <div class="chip" data-val="Cancelled" onclick="filterRequests('Cancelled',this)">Cancelled</div>
+        </div>
+        <div class="card" style="padding:0;">
+          <div class="table-wrap">
+            <table id="requestsTable">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Material</th>
+                  <th>Qty (MT)</th>
+                  <th>Est. Value</th>
+                  <th>Required By</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="requestsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE VIEW -->
+      <div id="view-profile" class="view" style="display:none;">
+        <div class="section-head"><h2>COMPANY PROFILE</h2><p>Your registered company details on HaritaSource.</p></div>
+        <div class="profile-header" id="profileHeader"></div>
+        <div class="profile-grid" id="profileGrid"></div>
+        <div class="divider"></div>
+        <div class="card" style="max-width:500px;">
+          <h4 class="font-display" style="font-size:0.95rem;letter-spacing:1px;margin-bottom:1.2rem;">CHANGE PASSWORD</h4>
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input class="form-input" type="password" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input class="form-input" type="password" placeholder="••••••••">
+          </div>
+          <button class="btn btn-outline" onclick="showToast('Password updated successfully!','success')">Update Password</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ───────────────────── DATA ─────────────────────
+const DEMO_COMPANIES = {
+  'procurement@tatasteels.in': { pass:'tata@2025', name:'Tata Steels Ltd.', industry:'Metal Manufacturing', gst:'27AAACT2727Q1ZW', city:'Mumbai', contact:'Rajan Mehta', email:'procurement@tatasteels.in', phone:'+91 22 6665 8000', verified:true },
+  'orders@relianceinds.in':    { pass:'reliance@2025', name:'Reliance Industries', industry:'Plastics', gst:'27AAAAA2727Q1ZX', city:'Mumbai', contact:'Priya Nair', email:'orders@relianceinds.in', phone:'+91 22 4477 9000', verified:true },
+  'buying@itcgroup.in':        { pass:'itc@2025', name:'ITC Limited', industry:'FMCG', gst:'19AAACI2727Q1ZY', city:'Kolkata', contact:'Suresh Kumar', email:'buying@itcgroup.in', phone:'+91 33 2288 9371', verified:true },
+};
+
+const MATERIALS_DATA = [
+  { id:'pp', name:'PP Granules', cat:'Plastic', icon:'🧴', color:'#4A9EFF', price:28000, unit:'₹/MT', minOrder:5, maxOrder:500, available:320, grade:'Sorted & washed polypropylene granules', purity:'97–99%', form:'Granules/Pellets', moisture:'<1%', size:'2–5mm', uses:'Packaging, Containers, Automotive parts' },
+  { id:'pet', name:'PET Flakes', cat:'Plastic', icon:'🍶', color:'#4A9EFF', price:32000, unit:'₹/MT', minOrder:5, maxOrder:300, available:185, grade:'Clear & coloured PET bottle flakes', purity:'98%+', form:'Flakes', moisture:'<0.5%', size:'8–14mm', uses:'Polyester fibre, New PET bottles, Strapping' },
+  { id:'hdpe', name:'HDPE Regrind', cat:'Plastic', icon:'🧃', color:'#4A9EFF', price:24000, unit:'₹/MT', minOrder:5, maxOrder:400, available:240, grade:'High-density polyethylene from containers', purity:'96–98%', form:'Regrind/Flakes', moisture:'<1%', size:'5–12mm', uses:'Pipes, Containers, Construction sheets' },
+  { id:'paper-pulp', name:'Paper Pulp', cat:'Paper', icon:'📄', color:'#F5A623', price:8500, unit:'₹/MT', minOrder:10, maxOrder:2000, available:1200, grade:'Deinked mixed office paper pulp', purity:'90–94%', form:'Wet/Dry pulp bales', moisture:'8–12%', size:'Baled 500kg', uses:'Tissue, Newsprint, Packaging board' },
+  { id:'cardboard', name:'OCC Cardboard', cat:'Paper', icon:'📦', color:'#F5A623', price:6200, unit:'₹/MT', minOrder:10, maxOrder:3000, available:2100, grade:'Old corrugated containers (OCC)', purity:'95%+', form:'Baled', moisture:'<15%', size:'Bales 500–700kg', uses:'Carton manufacturing, Brown paper' },
+  { id:'newsprint', name:'ONP Newsprint', cat:'Paper', icon:'📰', color:'#F5A623', price:5800, unit:'₹/MT', minOrder:10, maxOrder:1500, available:880, grade:'Old newspapers — cleaned & sorted', purity:'93–96%', form:'Baled 500kg', moisture:'<12%', size:'Baled', uses:'Newsprint, Tissue paper, Egg trays' },
+  { id:'aluminium', name:'Aluminium Scrap', cat:'Metal', icon:'🥤', color:'#9AADA0', price:120000, unit:'₹/MT', minOrder:1, maxOrder:100, available:45, grade:'UBC — Used beverage cans, sorted', purity:'96–99% Al', form:'Baled / Loose', moisture:'Nil', size:'Baled or shredded', uses:'Casting, Extrusion, Sheet rolling' },
+  { id:'steel', name:'HMS Steel Scrap', cat:'Metal', icon:'🔩', color:'#9AADA0', price:34000, unit:'₹/MT', minOrder:5, maxOrder:1000, available:680, grade:'Heavy Melting Scrap (HMS 1&2)', purity:'95%+', form:'Loose / Baled', moisture:'Nil', size:'>6mm thick', uses:'Steel making, Rolling mills' },
+  { id:'glass-clear', name:'Clear Glass Cullet', cat:'Glass', icon:'🫙', color:'#74C69D', price:4200, unit:'₹/MT', minOrder:10, maxOrder:800, available:560, grade:'Sorted flint glass cullet', purity:'98%+', form:'Crushed cullet', moisture:'<2%', size:'<25mm pieces', uses:'Glass bottle re-melting, Fibreglass' },
+  { id:'ewaste-cu', name:'E-Waste Copper', cat:'E-Waste', icon:'💻', color:'#E05252', price:380000, unit:'₹/MT', minOrder:0.5, maxOrder:20, available:8, grade:'Stripped copper wire from PCBs', purity:'97–99% Cu', form:'Stripped wire / granules', moisture:'Nil', size:'< 5mm', uses:'Wire drawing, Alloy making' },
+  { id:'rubber', name:'Crumb Rubber', cat:'Other', icon:'🛞', color:'#9AADA0', price:18000, unit:'₹/MT', minOrder:5, maxOrder:500, available:320, grade:'From end-of-life tyres, devulcanised', purity:'98%', form:'Crumb / Powder', moisture:'<1%', size:'0.4–2mm', uses:'Road construction, Sports surfaces, Moulding' },
+  { id:'lldpe', name:'LLDPE Film Scrap', cat:'Plastic', icon:'🛍', color:'#4A9EFF', price:21000, unit:'₹/MT', minOrder:5, maxOrder:200, available:140, grade:'Linear low-density PE film (clean)', purity:'95%+', form:'Densified / Baled', moisture:'<1%', size:'Baled', uses:'Plastic film, Bin liners, Agriculture film' },
+];
+
+const STATUS_CONFIG = {
+  'Pending':    { badge:'badge-amber', icon:'⏳' },
+  'Approved':   { badge:'badge-blue',  icon:'✅' },
+  'In Transit': { badge:'badge-green', icon:'🚛' },
+  'Fulfilled':  { badge:'badge-green', icon:'✓' },
+  'Cancelled':  { badge:'badge-red',   icon:'✕' },
+};
+
+// ───────────────────── STATE ─────────────────────
+let currentUser = null;
+let requests = {};  // keyed by company email
+let currentFilter = 'all';
+let cancelTargetId = null;
+let reqStep = 1;
+let selectedMaterial = null;
+
+// Pre-populate demo requests
+function initDemoRequests() {
+  const today = new Date();
+  const fmt = (d) => d.toISOString().split('T')[0];
+  const sub = (days) => { let d = new Date(today); d.setDate(d.getDate() - days); return fmt(d); };
+  const add = (days) => { let d = new Date(today); d.setDate(d.getDate() + days); return fmt(d); };
+
+  requests['procurement@tatasteels.in'] = [
+    { id:'HS-2025-0041', matId:'steel', matName:'HMS Steel Scrap', qty:200, price:34000, total:6800000, date:sub(12), reqBy:add(5), urgency:'standard', grade:'A', status:'In Transit', notes:'Must be HMS 1 grade only. Shredded preferred.', po:'PO-2025-0812' },
+    { id:'HS-2025-0039', matId:'aluminium', matName:'Aluminium Scrap', qty:15, price:120000, total:1800000, date:sub(20), reqBy:sub(2), urgency:'express', grade:'A', status:'Fulfilled', notes:'UBC only. Baled.', po:'PO-2025-0798' },
+    { id:'HS-2025-0035', matId:'steel', matName:'HMS Steel Scrap', qty:500, price:34000, total:17000000, date:sub(35), reqBy:sub(10), urgency:'standard', grade:'B', status:'Fulfilled', notes:'', po:'PO-2025-0756' },
+  ];
+  requests['orders@relianceinds.in'] = [
+    { id:'HS-2025-0044', matId:'pp', matName:'PP Granules', qty:80, price:28000, total:2240000, date:sub(3), reqBy:add(10), urgency:'standard', grade:'A', status:'Approved', notes:'Clear grade preferred.', po:'PO-RIL-1042' },
+    { id:'HS-2025-0040', matId:'hdpe', matName:'HDPE Regrind', qty:50, price:24000, total:1200000, date:sub(18), reqBy:add(2), urgency:'express', grade:'B', status:'In Transit', notes:'Natural/white only.', po:'PO-RIL-1035' },
+    { id:'HS-2025-0037', matId:'lldpe', matName:'LLDPE Film Scrap', qty:30, price:21000, total:630000, date:sub(30), reqBy:sub(5), urgency:'standard', grade:'B', status:'Fulfilled', notes:'', po:'' },
+    { id:'HS-2025-0030', matId:'pet', matName:'PET Flakes', qty:100, price:32000, total:3200000, date:sub(55), reqBy:sub(25), urgency:'standard', grade:'A', status:'Fulfilled', notes:'Clear flakes only.', po:'PO-RIL-1010' },
+  ];
+  requests['buying@itcgroup.in'] = [
+    { id:'HS-2025-0042', matId:'cardboard', matName:'OCC Cardboard', qty:500, price:6200, total:3100000, date:sub(8), reqBy:add(7), urgency:'standard', grade:'A', status:'Pending', notes:'Must meet IS 1898 standard.', po:'ITC-BUY-2290' },
+    { id:'HS-2025-0038', matId:'paper-pulp', matName:'Paper Pulp', qty:300, price:8500, total:2550000, date:sub(22), reqBy:sub(1), urgency:'express', grade:'A', status:'Fulfilled', notes:'Deinked, brightness >70 ISO.', po:'ITC-BUY-2265' },
+  ];
+}
+
+// ───────────────────── AUTH ─────────────────────
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  document.getElementById('loginErr').textContent = '';
+  if (!email || !pass) { document.getElementById('loginErr').textContent = 'Please fill all fields.'; return; }
+  const co = DEMO_COMPANIES[email];
+  if (co && co.pass === pass) {
+    currentUser = { ...co };
+    enterApp();
+  } else if (email && pass.length >= 6) {
+    // Allow any valid-looking email/pass as new company
+    currentUser = { name: email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) + ' Corp', industry:'Other', gst:'27AAAAA0000A1Z5', city:'Mumbai', contact:'Admin User', email, phone:'+91 98765 43210', verified:false };
+    if (!requests[email]) requests[email] = [];
+    enterApp();
+  } else {
+    document.getElementById('loginErr').textContent = 'Invalid credentials. Use a demo account above.';
+  }
+}
+
+function doRegister() {
+  const company = document.getElementById('regCompany').value.trim();
+  const industry = document.getElementById('regIndustry').value;
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const gst = document.getElementById('regGST').value.trim();
+  const city = document.getElementById('regCity').value;
+  const pass = document.getElementById('regPass').value;
+  document.getElementById('regErr').textContent = '';
+  if (!company||!industry||!email||!gst||!city||!pass) { document.getElementById('regErr').textContent='Please fill all fields.'; return; }
+  if (pass.length < 8) { document.getElementById('regErr').textContent='Password must be 8+ characters.'; return; }
+  currentUser = { name:company, industry, gst, city, contact:'Procurement Team', email, phone:'—', verified:false };
+  DEMO_COMPANIES[email] = { ...currentUser, pass };
+  if (!requests[email]) requests[email] = [];
+  enterApp();
+  showToast('Company registered! Welcome to HaritaSource.','success');
+}
+
+function enterApp() {
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-app').classList.add('active');
+  document.getElementById('navAv').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('navName').textContent = currentUser.name;
+  document.getElementById('dashHeading').textContent = `WELCOME, ${currentUser.name.toUpperCase()}`;
+  renderTicker();
+  switchView('dashboard');
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('page-app').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+  showToast('Logged out successfully.','success');
+}
+
+// ───────────────────── NAVIGATION ─────────────────────
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.style.display='none');
+  const el = document.getElementById('view-'+name);
+  if (el) el.style.display='block';
+
+  document.querySelectorAll('.sidebar-item').forEach(s => {
+    s.classList.toggle('active', s.dataset.view === name);
+  });
+  document.querySelectorAll('#appNavLinks .nav-btn').forEach(b => b.classList.remove('active-link'));
+
+  if (name==='dashboard') renderDashboard();
+  if (name==='catalogue') renderCatalogue();
+  if (name==='new-request') initReqForm();
+  if (name==='my-requests') renderRequests('all');
+  if (name==='profile') renderProfile();
+}
+
+// ───────────────────── TICKER ─────────────────────
+function renderTicker() {
+  const items = MATERIALS_DATA.map(m => {
+    const change = (Math.random()*5-2).toFixed(1);
+    const up = parseFloat(change) >= 0;
+    return `<span class="ticker-item"><span class="t-name">${m.name}</span> ₹${(m.price/1000).toFixed(1)}k/MT <span class="${up?'t-up':'t-down'}">${up?'▲':'▼'}${Math.abs(change)}%</span></span>`;
+  }).join('');
+  const full = items + items;
+  document.getElementById('tickerContent').innerHTML = full;
+}
+
+// ───────────────────── DASHBOARD ─────────────────────
+function renderDashboard() {
+  const reqs = (requests[currentUser.email] || []);
+  const total = reqs.length;
+  const pending = reqs.filter(r=>r.status==='Pending'||r.status==='Approved').length;
+  const fulfilled = reqs.filter(r=>r.status==='Fulfilled').length;
+  const volume = reqs.filter(r=>r.status!=='Cancelled').reduce((s,r)=>s+r.qty,0);
+  const spent = reqs.filter(r=>r.status==='Fulfilled'||r.status==='In Transit').reduce((s,r)=>s+r.total,0);
+
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiPending').textContent = pending;
+  document.getElementById('kpiFulfilled').textContent = fulfilled;
+  document.getElementById('kpiVolume').textContent = volume.toLocaleString('en-IN')+' MT';
+  document.getElementById('kpiSpent').textContent = '₹'+formatCrLakh(spent);
+
+  // Recent
+  const recEl = document.getElementById('dashRecentRequests');
+  const recent = [...reqs].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
+  if (recent.length===0) { recEl.innerHTML='<p class="text-muted" style="font-size:0.85rem;">No requests yet.</p>'; }
+  else {
+    recEl.innerHTML = recent.map(r=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;">
+        <div>
+          <div style="font-weight:600;">${r.matName}</div>
+          <div class="text-muted" style="font-size:0.78rem;">${r.id} · ${r.qty} MT</div>
+        </div>
+        <span class="badge ${STATUS_CONFIG[r.status].badge}">${STATUS_CONFIG[r.status].icon} ${r.status}</span>
+      </div>
+    `).join('');
+  }
+
+  // Top materials
+  const matCount = {};
+  reqs.forEach(r=>{ matCount[r.matName]=(matCount[r.matName]||0)+r.qty; });
+  const topMats = Object.entries(matCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxQ = topMats[0]?.[1] || 1;
+  document.getElementById('dashTopMaterials').innerHTML = topMats.length===0
+    ? '<p class="text-muted" style="font-size:0.85rem;">No data yet.</p>'
+    : topMats.map(([name,qty])=>`
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px;">
+          <span>${name}</span><span class="text-green fw-bold">${qty} MT</span>
+        </div>
+        <div class="mat-avail-bar"><div class="mat-avail-fill" style="width:${(qty/maxQ*100).toFixed(0)}%"></div></div>
+      </div>
+    `).join('');
+}
+
+// ───────────────────── CATALOGUE ─────────────────────
+function renderCatalogue(filterCat) {
+  const cats = [...new Set(MATERIALS_DATA.map(m=>m.cat))];
+  const filtersEl = document.getElementById('catFilters');
+  if (!filtersEl.innerHTML) {
+    filtersEl.innerHTML = ['All',...cats].map((c,i)=>`
+      <div class="chip${i===0?' selected':''}" onclick="renderCatalogue(${i===0?'null':"'"+c+"'"}); document.querySelectorAll('#catFilters .chip').forEach(x=>x.classList.remove('selected')); this.classList.add('selected');">${c}</div>
+    `).join('');
+  }
+  const filtered = filterCat ? MATERIALS_DATA.filter(m=>m.cat===filterCat) : MATERIALS_DATA;
+  document.getElementById('catalogueGrid').innerHTML = filtered.map(m=>`
+    <div class="mat-card" onclick="openOrderFromCatalogue('${m.id}')">
+      <div class="mat-card-header">
+        <div class="mat-icon-box" style="background:${m.color}22;">${m.icon}</div>
+        <div>
+          <div class="mat-card-name">${m.name}</div>
+          <div class="mat-card-cat">${m.cat}</div>
+        </div>
+      </div>
+      <div class="mat-card-body">
+        <div class="mat-spec"><span class="mat-spec-label">Price</span><span class="mat-spec-val text-green">₹${m.price.toLocaleString('en-IN')}/MT</span></div>
+        <div class="mat-spec"><span class="mat-spec-label">Purity</span><span class="mat-spec-val">${m.purity}</span></div>
+        <div class="mat-spec"><span class="mat-spec-label">Form</span><span class="mat-spec-val">${m.form}</span></div>
+        <div class="mat-spec"><span class="mat-spec-label">Min Order</span><span class="mat-spec-val">${m.minOrder} MT</span></div>
+        <div class="mat-spec"><span class="mat-spec-label">Uses</span><span class="mat-spec-val" style="font-size:0.78rem;max-width:160px;text-align:right;">${m.uses}</span></div>
+      </div>
+      <div class="mat-card-footer">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text2);margin-bottom:5px;">
+          <span>Available stock</span><span class="text-green fw-bold">${m.available} MT</span>
+        </div>
+        <div class="mat-avail-bar"><div class="mat-avail-fill" style="width:${Math.min(100,(m.available/m.maxOrder*100)).toFixed(0)}%"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openOrderFromCatalogue(matId) {
+  switchView('new-request');
+  setTimeout(()=>{
+    const catSelect = document.getElementById('reqCat');
+    const mat = MATERIALS_DATA.find(m=>m.id===matId);
+    catSelect.value = mat.cat;
+    onCatChange();
+    setTimeout(()=>{ document.getElementById('reqMat').value=matId; onMatChange(); },100);
+  },150);
+}
+
+// ───────────────────── REQUEST FORM ─────────────────────
+function initReqForm() {
+  // Populate category dropdown
+  const cats = [...new Set(MATERIALS_DATA.map(m=>m.cat))];
+  const catSel = document.getElementById('reqCat');
+  catSel.innerHTML = '<option value="">Choose category</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('reqMatGroup').style.display='none';
+  document.getElementById('reqMatDetails').style.display='none';
+  document.getElementById('totalEstimate').style.display='none';
+  selectedMaterial = null;
+  unlockStep(1);
+  renderStepBar(1);
+}
+
+function onCatChange() {
+  const cat = document.getElementById('reqCat').value;
+  const matSel = document.getElementById('reqMat');
+  if (!cat) { document.getElementById('reqMatGroup').style.display='none'; return; }
+  const mats = MATERIALS_DATA.filter(m=>m.cat===cat);
+  matSel.innerHTML = '<option value="">Choose material</option>' + mats.map(m=>`<option value="${m.id}">${m.name} — ₹${m.price.toLocaleString('en-IN')}/MT</option>`).join('');
+  document.getElementById('reqMatGroup').style.display='block';
+  document.getElementById('reqMatDetails').style.display='none';
+  document.getElementById('totalEstimate').style.display='none';
+  selectedMaterial = null;
+  unlockStep(1);
+}
+
+function onMatChange() {
+  const matId = document.getElementById('reqMat').value;
+  if (!matId) return;
+  selectedMaterial = MATERIALS_DATA.find(m=>m.id===matId);
+  if (!selectedMaterial) return;
+  document.getElementById('reqMatDetails').style.display='block';
+  document.getElementById('reqMatDetails').innerHTML = `
+    <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-top:0.5rem;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+        <div style="font-size:1.6rem;">${selectedMaterial.icon}</div>
+        <div>
+          <div style="font-weight:700;font-size:0.95rem;">${selectedMaterial.name}</div>
+          <div class="text-muted" style="font-size:0.78rem;">${selectedMaterial.grade}</div>
+        </div>
+        <span class="badge badge-green" style="margin-left:auto;">₹${selectedMaterial.price.toLocaleString('en-IN')}/MT</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:0.8rem;">
+        <div><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;">Purity</div><div style="font-weight:600;">${selectedMaterial.purity}</div></div>
+        <div><div class="text-muted" style="font-size:0.72px;text-transform:uppercase;font-size:0.72rem;letter-spacing:0.5px;">Form</div><div style="font-weight:600;">${selectedMaterial.form}</div></div>
+        <div><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;">Available</div><div style="font-weight:600;color:var(--green);">${selectedMaterial.available} MT</div></div>
+        <div><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;">Min Order</div><div style="font-weight:600;">${selectedMaterial.minOrder} MT</div></div>
+        <div><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;">Moisture</div><div style="font-weight:600;">${selectedMaterial.moisture}</div></div>
+        <div><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;">Size</div><div style="font-weight:600;">${selectedMaterial.size}</div></div>
+      </div>
+    </div>
+  `;
+  unlockStep(2);
+  renderStepBar(2);
+}
+
+function unlockStep(upTo) {
+  for (let i=1;i<=3;i++) {
+    const el = document.getElementById('req-step-'+i);
+    if (i<=upTo) { el.style.opacity='1'; el.style.pointerEvents='all'; }
+    else { el.style.opacity='0.4'; el.style.pointerEvents='none'; }
+  }
+  if (upTo>=2) unlockStep3Check();
+}
+
+function unlockStep3Check() {
+  const qty = document.getElementById('reqQty').value;
+  const date = document.getElementById('reqDate').value;
+  const loc = document.getElementById('reqLocation').value;
+  if (qty && date && loc) { unlockStep(3); renderStepBar(3); }
+}
+
+function calcTotal() {
+  unlockStep3Check();
+  const qty = parseFloat(document.getElementById('reqQty').value);
+  if (!qty || !selectedMaterial) { document.getElementById('totalEstimate').style.display='none'; return; }
+  const total = qty * selectedMaterial.price;
+  document.getElementById('totalEstimate').style.display='block';
+  document.getElementById('estUnitPrice').textContent = '₹'+selectedMaterial.price.toLocaleString('en-IN')+'/MT';
+  document.getElementById('estQty').textContent = qty+' MT';
+  document.getElementById('estTotal').textContent = '₹'+total.toLocaleString('en-IN');
+}
+
+function renderStepBar(active) {
+  const steps = ['Select Material','Quantity & Delivery','Submit'];
+  document.getElementById('stepBar').innerHTML = steps.map((s,i)=>{
+    const n=i+1;
+    const done = n<active;
+    const isActive = n===active;
+    const lineClass = done ? 'done' : '';
+    return `
+      <div class="step-item">
+        <div class="step-num ${isActive?'active':done?'done':''}">${done?'✓':n}</div>
+        <span class="step-label ${isActive?'active':''}">${s}</span>
+      </div>
+      ${n<3?`<div class="step-line ${lineClass}"></div>`:''}
+    `;
+  }).join('');
+}
+
+function selectChip(el, groupId) {
+  document.querySelectorAll(`#${groupId} .chip`).forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  if (groupId==='urgencyChips') unlockStep3Check();
+}
+
+function submitRequest() {
+  const matId = document.getElementById('reqMat').value;
+  const qty = parseFloat(document.getElementById('reqQty').value);
+  const date = document.getElementById('reqDate').value;
+  const loc = document.getElementById('reqLocation').value.trim();
+  document.getElementById('qtyErr').textContent='';
+
+  if (!matId||!selectedMaterial) { showToast('Please select a material.','error'); return; }
+  if (!qty||qty<selectedMaterial.minOrder) {
+    document.getElementById('qtyErr').textContent=`Minimum order is ${selectedMaterial.minOrder} MT.`;
+    return;
+  }
+  if (qty>selectedMaterial.available) {
+    document.getElementById('qtyErr').textContent=`Only ${selectedMaterial.available} MT available in stock.`;
+    return;
+  }
+  if (!date) { showToast('Please select a required-by date.','error'); return; }
+  if (!loc) { showToast('Please enter delivery location.','error'); return; }
+
+  const urgency = document.querySelector('#urgencyChips .chip.selected')?.dataset.val || 'standard';
+  const grade   = document.querySelector('#gradeChips .chip.selected')?.dataset.val || 'A';
+  const notes   = document.getElementById('reqNotes').value.trim();
+  const po      = document.getElementById('reqPO').value.trim();
+
+  const reqId = 'HS-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  const total = qty * selectedMaterial.price;
+
+  const req = {
+    id:reqId, matId, matName:selectedMaterial.name, qty, price:selectedMaterial.price,
+    total, date:new Date().toISOString().split('T')[0], reqBy:date,
+    urgency, grade, status:'Pending', notes, po, location:loc,
+  };
+
+  if (!requests[currentUser.email]) requests[currentUser.email] = [];
+  requests[currentUser.email].unshift(req);
+
+  showToast(`✓ Request ${reqId} submitted!`,'success');
+  resetReqForm();
+  setTimeout(()=>switchView('my-requests'),800);
+}
+
+function resetReqForm() {
+  document.getElementById('reqCat').value='';
+  document.getElementById('reqMat').innerHTML='<option value="">Choose material</option>';
+  document.getElementById('reqMatGroup').style.display='none';
+  document.getElementById('reqMatDetails').style.display='none';
+  document.getElementById('reqQty').value='';
+  document.getElementById('reqDate').value='';
+  document.getElementById('reqLocation').value='';
+  document.getElementById('reqNotes').value='';
+  document.getElementById('reqPO').value='';
+  document.getElementById('totalEstimate').style.display='none';
+  document.getElementById('qtyErr').textContent='';
+  selectedMaterial=null;
+  unlockStep(1);
+  renderStepBar(1);
+  document.querySelectorAll('#urgencyChips .chip').forEach((c,i)=>c.classList.toggle('selected',i===0));
+  document.querySelectorAll('#gradeChips .chip').forEach((c,i)=>c.classList.toggle('selected',i===0));
+}
+
+// ───────────────────── REQUESTS TABLE ─────────────────────
+function renderRequests(filter) {
+  currentFilter = filter;
+  const reqs = (requests[currentUser.email] || []);
+  const filtered = filter==='all' ? reqs : reqs.filter(r=>r.status===filter);
+
+  if (filtered.length===0) {
+    document.getElementById('requestsBody').innerHTML = `
+      <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text2);font-size:0.88rem;">
+        No requests found. <span class="text-green" style="cursor:pointer;font-weight:600;" onclick="switchView('new-request')">Create your first request →</span>
+      </td></tr>`;
+    return;
+  }
+
+  document.getElementById('requestsBody').innerHTML = filtered.map(r=>`
+    <tr>
+      <td><span class="req-id">${r.id}</span></td>
+      <td>
+        <div style="font-weight:600;">${r.matName}</div>
+        ${r.po?`<div class="text-muted" style="font-size:0.75rem;">${r.po}</div>`:''}
+      </td>
+      <td>${r.qty.toLocaleString('en-IN')}</td>
+      <td style="font-weight:600;">₹${formatCrLakh(r.total)}</td>
+      <td>
+        <div style="font-size:0.85rem;">${formatDate(r.reqBy)}</div>
+        <div class="text-muted" style="font-size:0.75rem;">${urgencyLabel(r.urgency)}</div>
+      </td>
+      <td><span class="badge ${STATUS_CONFIG[r.status].badge}">${STATUS_CONFIG[r.status].icon} ${r.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="viewRequestDetail('${r.id}')">View</button>
+          ${r.status==='Pending'?`<button class="btn btn-danger btn-sm" onclick="promptCancel('${r.id}')">Cancel</button>`:''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterRequests(val, el) {
+  document.querySelectorAll('#reqStatusFilter .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  renderRequests(val);
+}
+
+function viewRequestDetail(reqId) {
+  const reqs = (requests[currentUser.email]||[]);
+  const r = reqs.find(x=>x.id===reqId);
+  if (!r) return;
+  const mat = MATERIALS_DATA.find(m=>m.id===r.matId);
+  document.getElementById('modalTitle').textContent = r.id;
+  document.getElementById('modalSubtitle').textContent = `${r.matName} · Submitted ${formatDate(r.date)}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+      ${infoRow('Material', r.matName)}
+      ${infoRow('Category', mat?.cat||'—')}
+      ${infoRow('Quantity', r.qty+' MT')}
+      ${infoRow('Unit Price', '₹'+r.price.toLocaleString('en-IN')+'/MT')}
+      ${infoRow('Total Value', '₹'+r.total.toLocaleString('en-IN'))}
+      ${infoRow('Required By', formatDate(r.reqBy))}
+      ${infoRow('Urgency', urgencyLabel(r.urgency))}
+      ${infoRow('Grade', 'Grade '+r.grade)}
+      ${infoRow('Status', `<span class="badge ${STATUS_CONFIG[r.status].badge}">${STATUS_CONFIG[r.status].icon} ${r.status}</span>`)}
+      ${infoRow('PO Number', r.po||'—')}
+    </div>
+    ${r.notes?`<div style="background:var(--bg4);border-radius:10px;padding:10px 14px;font-size:0.85rem;"><span class="text-muted">Notes: </span>${r.notes}</div>`:''}
+  `;
+  document.getElementById('modalAction').textContent = '📋 Copy Request ID';
+  document.getElementById('modalAction').onclick = ()=>{ navigator.clipboard?.writeText(r.id); showToast('Request ID copied!','success'); };
+  openModal('orderModal');
+}
+
+function infoRow(label, val) {
+  return `<div style="background:var(--bg4);border-radius:10px;padding:10px 12px;"><div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">${label}</div><div style="font-size:0.88rem;font-weight:600;">${val}</div></div>`;
+}
+
+function promptCancel(reqId) {
+  cancelTargetId = reqId;
+  document.getElementById('confirmCancelBtn').onclick = ()=>{ confirmCancel(reqId); };
+  openModal('cancelModal');
+}
+
+function confirmCancel(reqId) {
+  const reqs = requests[currentUser.email]||[];
+  const r = reqs.find(x=>x.id===reqId);
+  if (r) r.status='Cancelled';
+  closeModal('cancelModal');
+  renderRequests(currentFilter);
+  renderDashboard();
+  showToast('Request cancelled.','error');
+}
+
+// ───────────────────── PROFILE ─────────────────────
+function renderProfile() {
+  const u = currentUser;
+  document.getElementById('profileHeader').innerHTML = `
+    <div class="profile-avatar-large">${u.name.charAt(0).toUpperCase()}</div>
+    <div class="profile-info">
+      <h3>${u.name}</h3>
+      <p>${u.industry} · ${u.city}</p>
+      ${u.verified?'<span class="badge badge-green" style="margin-top:8px;">✓ Verified Company</span>':'<span class="badge badge-amber" style="margin-top:8px;">⏳ Pending Verification</span>'}
+    </div>
+  `;
+  const fields = [
+    ['Company Name', u.name],
+    ['Industry', u.industry],
+    ['Contact Person', u.contact],
+    ['Email', u.email],
+    ['Phone', u.phone],
+    ['City', u.city],
+    ['GST Number', u.gst],
+    ['Account Type', 'Procurement / Buyer'],
+  ];
+  document.getElementById('profileGrid').innerHTML = fields.map(([l,v])=>`
+    <div class="info-field"><div class="info-field-label">${l}</div><div class="info-field-val">${v}</div></div>
+  `).join('');
+}
+
+// ───────────────────── HELPERS ─────────────────────
+function formatCrLakh(num) {
+  if (num>=10000000) return (num/10000000).toFixed(2)+' Cr';
+  if (num>=100000) return (num/100000).toFixed(2)+' L';
+  return num.toLocaleString('en-IN');
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function urgencyLabel(u) {
+  return u==='urgent'?'⚡ Urgent':u==='express'?'🚀 Express':'📅 Standard';
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className='show'+(type?' '+type:'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.className=''; }, 3500);
+}
+
+// Close modals on outside click
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+// Enter key
+document.addEventListener('keydown', e=>{
+  if (e.key==='Enter') {
+    const lp = document.getElementById('page-login');
+    if (lp.classList.contains('active')) {
+      const loginVisible = document.getElementById('login-form').style.display!=='none';
+      if (loginVisible) doLogin(); else doRegister();
+    }
+  }
+  if (e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));
+});
+
+// ───────────────────── INIT ─────────────────────
+initDemoRequests();
+</script>
+</body>
+</html>

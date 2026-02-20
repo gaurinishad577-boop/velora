@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HariYali — Submit Recycling</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #0e1f14;
+  --forest:   #1b4332;
+  --pine:     #2d6a4f;
+  --sage:     #52b788;
+  --mint:     #95d5b2;
+  --foam:     #d8f3dc;
+  --cream:    #f4f9f1;
+  --amber:    #f4a261;
+  --amber-dk: #e76f51;
+  --white:    #ffffff;
+  --muted:    #6b8f71;
+  --border:   #c8e6c9;
+  --shadow:   0 4px 24px rgba(14,31,20,0.10);
+  --shadow-lg:0 16px 56px rgba(14,31,20,0.16);
+  --r:        16px;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--forest);
+  height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+  color: var(--sage); display: flex; align-items: center; gap: 8px;
+}
+.nav-logo span { color: #fff; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-pts {
+  background: var(--amber); color: var(--ink);
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem;
+  padding: 6px 14px; border-radius: 50px;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-user {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--sage); color: var(--forest);
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.nav-link {
+  background: none; border: none; color: rgba(255,255,255,0.6);
+  font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+  cursor: pointer; padding: 6px 12px; border-radius: 8px;
+  transition: all 0.18s;
+}
+.nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+a.nav-link { color: rgba(255,255,255,0.6); }
+a.nav-link:hover { color: #fff; }
+
+/* ── HERO STRIP ── */
+.hero-strip {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--pine) 100%);
+  padding: 48px 32px 96px;
+  position: relative; overflow: hidden;
+}
+.hero-strip::before {
+  content: '♻';
+  position: absolute; right: 5%; top: -20px;
+  font-size: 14rem; opacity: 0.05; line-height: 1;
+  animation: spin 40s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero-strip::after {
+  content: '';
+  position: absolute; bottom: -2px; left: 0; right: 0; height: 60px;
+  background: var(--cream);
+  clip-path: ellipse(55% 100% at 50% 100%);
+}
+.hero-strip h1 {
+  font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800; color: #fff; margin-bottom: 10px;
+  position: relative; z-index: 1;
+}
+.hero-strip h1 em { color: var(--mint); font-style: normal; }
+.hero-strip p {
+  color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 520px;
+  line-height: 1.7; position: relative; z-index: 1;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 1080px; margin: 0 auto;
+  padding: 0 24px 60px;
+  margin-top: -56px;
+  position: relative; z-index: 2;
+}
+
+/* ── USER INFO CARD ── */
+.user-card {
+  background: var(--white); border-radius: var(--r);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 20px;
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  animation: fadeUp 0.5s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.user-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pine), var(--sage));
+  color: #fff; font-family: 'Syne', sans-serif;
+  font-size: 1.4rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 3px solid var(--foam);
+}
+.user-info h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; color: var(--ink); margin-bottom: 2px; }
+.user-info p { font-size: 0.83rem; color: var(--muted); }
+.user-badges { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.badge {
+  background: var(--foam); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 14px; text-align: center;
+}
+.badge-val { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--pine); }
+.badge-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── STEP INDICATOR ── */
+.steps-row {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+.step-item { display: flex; align-items: center; flex: 1; }
+.step-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--border); color: var(--muted);
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.35s; flex-shrink: 0; position: relative; z-index: 1;
+}
+.step-dot.active { background: var(--pine); color: #fff; box-shadow: 0 0 0 4px var(--foam); }
+.step-dot.done { background: var(--sage); color: #fff; }
+.step-line { flex: 1; height: 2px; background: var(--border); transition: background 0.35s; }
+.step-line.done { background: var(--sage); }
+.step-label { font-size: 0.72rem; color: var(--muted); margin-top: 6px; text-align: center; }
+.steps-labels { display: flex; margin-bottom: 24px; }
+.steps-labels > div { flex: 1; text-align: center; font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.steps-labels > div.active { color: var(--pine); }
+
+/* ── PANELS ── */
+.panel {
+  background: var(--white); border-radius: var(--r);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: fadeUp 0.5s 0.2s ease both;
+  overflow: hidden;
+}
+.panel-head {
+  padding: 24px 28px 0;
+  border-bottom: 1px solid var(--foam);
+  padding-bottom: 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.panel-head .ph-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--foam); display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.panel-head h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--ink); }
+.panel-head p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.panel-body { padding: 28px; }
+
+/* ── MATERIAL GRID ── */
+.mat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.mat-tile {
+  border: 2px solid var(--border);
+  border-radius: 14px; padding: 20px 14px;
+  text-align: center; cursor: pointer;
+  transition: all 0.22s; background: var(--white);
+  position: relative;
+}
+.mat-tile:hover { border-color: var(--sage); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(45,106,79,0.12); }
+.mat-tile.selected {
+  border-color: var(--pine); background: var(--foam);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.15);
+}
+.mat-tile .check {
+  position: absolute; top: 10px; right: 10px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--pine); color: #fff;
+  font-size: 0.7rem; display: none;
+  align-items: center; justify-content: center;
+}
+.mat-tile.selected .check { display: flex; }
+.mat-emoji { font-size: 2.4rem; margin-bottom: 10px; }
+.mat-name { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.mat-pts { font-size: 0.75rem; color: var(--pine); font-weight: 700;
+  background: var(--foam); padding: 2px 8px; border-radius: 20px; display: inline-block; }
+.mat-cat { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+
+/* ── QUANTITY SECTION ── */
+.qty-section { display: none; }
+.qty-section.visible { display: block; animation: fadeUp 0.35s ease both; }
+
+.selected-preview {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--foam); border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+.sp-emoji { font-size: 2rem; }
+.sp-info h4 { font-family: 'Syne', sans-serif; font-size: 0.95rem; color: var(--ink); }
+.sp-info p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+.sp-pts { margin-left: auto; text-align: right; }
+.sp-pts .rate { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--pine); }
+.sp-pts .rlbl { font-size: 0.7rem; color: var(--muted); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media(max-width:600px) { .form-row { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label {
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.field input, .field select, .field textarea {
+  padding: 13px 16px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--ink);
+  background: var(--cream); outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--pine); background: var(--white);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.08);
+}
+.field input::placeholder, .field textarea::placeholder { color: #b0c4b5; }
+.field textarea { resize: vertical; min-height: 80px; }
+.field select option { background: var(--white); }
+
+.hint { font-size: 0.74rem; color: var(--muted); margin-top: -4px; }
+
+/* Quantity stepper */
+.qty-stepper {
+  display: flex; align-items: center; gap: 0;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  overflow: hidden; background: var(--cream);
+}
+.qty-stepper button {
+  width: 44px; height: 48px; border: none; background: var(--foam);
+  font-size: 1.3rem; cursor: pointer; color: var(--pine);
+  transition: background 0.15s; font-weight: 700;
+  flex-shrink: 0;
+}
+.qty-stepper button:hover { background: var(--mint); }
+.qty-stepper input {
+  flex: 1; border: none; border-radius: 0;
+  text-align: center; font-family: 'Syne', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: var(--ink);
+  background: transparent; padding: 0;
+  box-shadow: none;
+}
+.qty-stepper input:focus { box-shadow: none; border-color: transparent; }
+
+/* Condition radio */
+.condition-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.cond-btn {
+  flex: 1; min-width: 90px;
+  padding: 11px 10px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--cream);
+  text-align: center; cursor: pointer; transition: all 0.18s;
+  font-family: 'Nunito', sans-serif;
+}
+.cond-btn:hover { border-color: var(--sage); }
+.cond-btn.selected { border-color: var(--pine); background: var(--foam); }
+.cond-btn .cb-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.cond-btn .cb-label { font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+.cond-btn .cb-sub { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+
+/* ── LIVE POINTS ESTIMATOR ── */
+.estimator {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--pine) 100%);
+  border-radius: 14px; padding: 22px 24px;
+  display: flex; align-items: center; gap: 20px;
+  margin: 24px 0; flex-wrap: wrap;
+}
+.est-item { flex: 1; min-width: 100px; text-align: center; }
+.est-val { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; }
+.est-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.55); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.est-div { width: 1px; height: 40px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+.est-pts { color: var(--mint); }
+
+/* ── DROP POINT ── */
+.drop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.drop-card {
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 16px 14px; cursor: pointer; transition: all 0.2s;
+  background: var(--white);
+}
+.drop-card:hover { border-color: var(--sage); }
+.drop-card.selected { border-color: var(--pine); background: var(--foam); }
+.dc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.dc-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--foam); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.dc-name { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--ink); }
+.dc-addr { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+.dc-meta { margin-top: 8px; display: flex; gap: 8px; }
+.dc-pill { font-size: 0.68rem; padding: 2px 8px; border-radius: 20px; }
+.dc-pill.open { background: #d1fae5; color: #065f46; }
+.dc-pill.dist { background: var(--foam); color: var(--pine); }
+
+/* ── UPLOAD ── */
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 14px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--cream);
+}
+.upload-zone:hover { border-color: var(--sage); background: var(--foam); }
+.upload-zone.dragging { border-color: var(--pine); background: var(--foam); }
+.upload-icon { font-size: 2.4rem; margin-bottom: 10px; opacity: 0.5; }
+.upload-zone h4 { font-family: 'Syne', sans-serif; font-size: 0.95rem; color: var(--ink); margin-bottom: 4px; }
+.upload-zone p { font-size: 0.8rem; color: var(--muted); }
+.upload-zone input { display: none; }
+.file-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.file-thumb {
+  width: 70px; height: 70px; border-radius: 10px;
+  background: var(--forest); display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; position: relative; overflow: hidden;
+  border: 2px solid var(--border);
+}
+.file-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.file-thumb .rm { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: rgba(0,0,0,0.6); border-radius: 50%; color: #fff; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* ── ACTION ROW ── */
+.action-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-top: 32px;
+}
+.btn {
+  padding: 14px 28px; border-radius: 50px; border: none;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800;
+  cursor: pointer; transition: all 0.22s; display: flex; align-items: center; gap: 8px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--pine), #3fa874);
+  color: #fff; box-shadow: 0 4px 18px rgba(45,106,79,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,106,79,0.4); }
+.btn-ghost { background: var(--foam); color: var(--pine); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--border); }
+.btn-lg { padding: 16px 40px; font-size: 1rem; }
+.btn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* Spinner */
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  animation: spin2 0.7s linear infinite; display: none;
+}
+@keyframes spin2 { to { transform: rotate(360deg); } }
+
+/* ── SUCCESS SCREEN ── */
+.success-screen {
+  display: none; text-align: center; padding: 60px 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.success-screen.show { display: block; }
+.success-ring {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage), var(--pine));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; margin: 0 auto 24px;
+  box-shadow: 0 0 0 12px var(--foam);
+  animation: popIn 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.success-screen h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 10px; }
+.success-screen p { color: var(--muted); font-size: 1rem; line-height: 1.7; max-width: 400px; margin: 0 auto 32px; }
+.tracking-box {
+  background: var(--foam); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 24px; display: inline-block; margin-bottom: 28px;
+}
+.tracking-box .t-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.tracking-box .t-id { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--pine); letter-spacing: 0.08em; }
+.pts-pop {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--amber); color: var(--ink);
+  border-radius: 50px; padding: 12px 24px;
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+  margin-bottom: 28px;
+  animation: popIn 0.5s 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.timeline {
+  text-align: left; max-width: 360px; margin: 0 auto 28px;
+}
+.tl-item { display: flex; gap: 14px; padding: 10px 0; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sage); margin-top: 5px; flex-shrink: 0; }
+.tl-done .tl-dot { background: var(--pine); }
+.tl-text strong { font-size: 0.88rem; color: var(--ink); display: block; }
+.tl-text span { font-size: 0.78rem; color: var(--muted); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--forest); color: #fff;
+  padding: 12px 24px; border-radius: 50px;
+  font-size: 0.88rem; font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  z-index: 9999; white-space: nowrap;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── PROGRESS BAR ── */
+.prog-bar { height: 4px; background: var(--border); border-radius: 4px; margin-bottom: 28px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--sage), var(--pine)); border-radius: 4px; transition: width 0.4s ease; }
+
+/* Responsive */
+@media(max-width:720px) {
+  .user-badges { display: none; }
+  .hero-strip { padding: 36px 20px 80px; }
+  .panel-body { padding: 20px; }
+  .mat-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+@media(max-width:480px) {
+  nav { padding: 0 16px; }
+  .main { padding: 0 14px 40px; }
+  .user-card { padding: 18px; }
+  .mat-grid { grid-template-columns: 1fr 1fr; }
+  .drop-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="home.html" style="text-decoration:none;display:flex;align-items:center;gap:8px;cursor:pointer;" title="Back to dashboard">
+    <div class="nav-logo" style="margin:0;">🌿 Hari<span>Yali</span></div>
+  </a>
+  <div class="nav-right">
+    <a href="home.html" class="nav-link" title="Back to dashboard" style="text-decoration:none;">← Dashboard</a>
+    <a href="index.html" class="nav-link" title="Logout" style="text-decoration:none;margin-left:auto;">Logout</a>
+    <div class="nav-pts">⭐ <span id="nav-pts">1,420</span> pts</div>
+    <div class="nav-user" id="nav-avatar">PS</div>
+  </div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="hero-strip">
+  <h1>Submit <em>Recyclables</em></h1>
+  <p>Log what you're recycling, choose a drop-off point, and earn green points instantly.</p>
+</div>
+
+<div class="main">
+
+  <!-- USER INFO -->
+  <div class="user-card">
+    <div class="user-avatar" id="u-avatar">PS</div>
+    <div class="user-info">
+      <h3 id="u-name">Priya Sharma</h3>
+      <p id="u-city">📍 Mumbai &nbsp;·&nbsp; Member since Jan 2025</p>
+    </div>
+    <div class="user-badges">
+      <div class="badge"><div class="badge-val" id="b-pts">1,420</div><div class="badge-lbl">Points</div></div>
+      <div class="badge"><div class="badge-val" id="b-kg">72.5</div><div class="badge-lbl">kg Recycled</div></div>
+      <div class="badge"><div class="badge-val">🥈</div><div class="badge-lbl">Silver Tier</div></div>
+    </div>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div style="animation: fadeUp 0.5s 0.1s ease both;">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:33%"></div></div>
+    <div class="steps-row" id="steps-row">
+      <div class="step-item">
+        <div class="step-dot active" id="sd1">1</div>
+        <div class="step-line" id="sl1"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot" id="sd2">2</div>
+        <div class="step-line" id="sl2"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot" id="sd3">3</div>
+        <div class="step-line" id="sl3" style="display:none"></div>
+      </div>
+    </div>
+    <div class="steps-labels">
+      <div class="active" id="sl-1">Choose Material</div>
+      <div id="sl-2">Enter Details</div>
+      <div id="sl-3">Drop Point</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 : CHOOSE MATERIAL -->
+  <div id="step1">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-icon">♻</div>
+        <div><h2>What are you recycling?</h2><p>Select the material type that best matches</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="mat-grid" id="mat-grid"></div>
+        <div class="action-row" style="justify-content:flex-end; margin-top:20px;">
+          <button class="btn btn-primary" id="btn-step1" onclick="goStep(2)" disabled>
+            Continue &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 : DETAILS -->
+  <div id="step2" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-icon">📋</div>
+        <div><h2>Enter Recycling Details</h2><p>Accurate details ensure correct point calculation</p></div>
+      </div>
+      <div class="panel-body">
+
+        <!-- Selected material preview -->
+        <div class="selected-preview" id="sel-preview"></div>
+
+        <!-- Quantity -->
+        <div class="form-row">
+          <div class="field">
+            <label>Quantity (kg)</label>
+            <div class="qty-stepper">
+              <button onclick="stepQty(-0.5)">−</button>
+              <input type="number" id="qty" value="1.0" min="0.1" step="0.5" oninput="recalc()">
+              <button onclick="stepQty(0.5)">+</button>
+            </div>
+            <div class="hint">Minimum: 0.5 kg per submission</div>
+          </div>
+          <div class="field">
+            <label>Number of Items / Bags</label>
+            <input type="number" id="items" placeholder="e.g. 5" min="1">
+          </div>
+        </div>
+
+        <!-- Condition -->
+        <div class="field" style="margin-bottom:20px;">
+          <label>Material Condition</label>
+          <div class="condition-row" id="cond-row">
+            <div class="cond-btn selected" onclick="setCond(this,'clean')">
+              <div class="cb-icon">✨</div>
+              <div class="cb-label">Clean</div>
+              <div class="cb-sub">Rinsed & dry</div>
+            </div>
+            <div class="cond-btn" onclick="setCond(this,'used')">
+              <div class="cb-icon">🔵</div>
+              <div class="cb-label">Used</div>
+              <div class="cb-sub">Normal wear</div>
+            </div>
+            <div class="cond-btn" onclick="setCond(this,'soiled')">
+              <div class="cb-icon">🟡</div>
+              <div class="cb-label">Soiled</div>
+              <div class="cb-sub">Needs cleaning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Collection Date</label>
+            <input type="date" id="col-date">
+          </div>
+          <div class="field">
+            <label>Preferred Time Slot</label>
+            <select id="col-time">
+              <option value="">Choose a slot</option>
+              <option>7:00 AM – 9:00 AM</option>
+              <option>9:00 AM – 11:00 AM</option>
+              <option>11:00 AM – 1:00 PM</option>
+              <option>2:00 PM – 4:00 PM</option>
+              <option>4:00 PM – 6:00 PM</option>
+              <option>6:00 PM – 8:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:20px;">
+          <label>Additional Notes <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+          <textarea id="notes" placeholder="Any special handling instructions, e.g. 'Compressed bales', 'Includes electronics packaging'…"></textarea>
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="field" style="margin-bottom:4px;">
+          <label>Upload Photos <span style="text-transform:none;font-weight:400;">(optional — +10 pts bonus)</span></label>
+        </div>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-inp').click()" 
+             ondragover="event.preventDefault();this.classList.add('dragging')"
+             ondragleave="this.classList.remove('dragging')"
+             ondrop="handleDrop(event)">
+          <input type="file" id="file-inp" multiple accept="image/*" onchange="handleFiles(this.files)">
+          <div class="upload-icon">📷</div>
+          <h4>Drag & drop photos or click to browse</h4>
+          <p>Helps verify material quality · JPG, PNG · Max 5MB each</p>
+          <div class="file-preview" id="file-preview"></div>
+        </div>
+
+        <!-- Live Estimator -->
+        <div class="estimator" id="estimator">
+          <div class="est-item"><div class="est-val" id="est-qty">1.0</div><div class="est-lbl">Kilograms</div></div>
+          <div class="est-div"></div>
+          <div class="est-item"><div class="est-val est-pts" id="est-pts">25</div><div class="est-lbl">Est. Points</div></div>
+          <div class="est-div"></div>
+          <div class="est-item"><div class="est-val" id="est-co2">1.8</div><div class="est-lbl">kg CO₂ Saved</div></div>
+          <div class="est-div"></div>
+          <div class="est-item"><div class="est-val" id="est-val">₹6</div><div class="est-lbl">Voucher Value</div></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Choose Drop Point →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 : DROP POINT + CONFIRM -->
+  <div id="step3" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-icon">📍</div>
+        <div><h2>Choose Drop-off Point</h2><p>Find the nearest HariYali collection centre</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="drop-grid" id="drop-grid"></div>
+
+        <!-- Summary -->
+        <div style="background:var(--foam);border-radius:14px;padding:22px 24px;margin-top:24px;border:1px solid var(--border);">
+          <div style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:800;color:var(--pine);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.07em;">📋 Submission Summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="summary-grid"></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary btn-lg" id="btn-submit" onclick="doSubmit()">
+            <div class="spinner" id="submit-spin"></div>
+            <span id="btn-submit-txt">✅ Confirm Submission</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-ring">🎉</div>
+    <h2>Submission Logged!</h2>
+    <p>Your recyclables have been registered. Drop them off at your chosen centre and points will be credited after verification.</p>
+    <div class="tracking-box">
+      <div class="t-label">Tracking ID</div>
+      <div class="t-id" id="tracking-id">HY-MUM-0000</div>
+    </div>
+    <br>
+    <div class="pts-pop">⭐ <span id="pts-earned">0</span> Points Will Be Credited</div>
+    <div class="timeline" id="tl"></div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="newSubmission()">♻ Submit Another</button>
+      <button class="btn btn-primary" onclick="window.location.href='#'">View Dashboard →</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── DATA ──
+const MATERIALS = [
+  { id:'pet',  emoji:'🧴', name:'PET Plastic', cat:'Plastic', pts:25, co2:2.2, desc:'Water & soda bottles' },
+  { id:'hdpe', emoji:'🥤', name:'HDPE Plastic', cat:'Plastic', pts:20, co2:1.9, desc:'Milk jugs, detergent' },
+  { id:'mixed',emoji:'🛢', name:'Mixed Plastic', cat:'Plastic', pts:10, co2:1.2, desc:'Bags, packaging' },
+  { id:'news', emoji:'📰', name:'Newspaper', cat:'Paper', pts:15, co2:1.5, desc:'Old newspapers' },
+  { id:'paper',emoji:'📚', name:'Office Paper', cat:'Paper', pts:18, co2:1.7, desc:'Printed paper, books' },
+  { id:'card', emoji:'📦', name:'Cardboard', cat:'Paper', pts:12, co2:1.3, desc:'Boxes, packaging' },
+  { id:'glass',emoji:'🍶', name:'Glass Bottles', cat:'Glass', pts:8,  co2:0.9, desc:'Bottles, jars' },
+  { id:'alum', emoji:'🥫', name:'Aluminium', cat:'Metal', pts:30, co2:3.5, desc:'Cans, foil, scrap' },
+  { id:'ewaste',emoji:'📱',name:'E-Waste', cat:'Electronic', pts:50, co2:4.0, desc:'Phones, cables, PCBs' },
+  { id:'cloth',emoji:'👕', name:'Old Clothing', cat:'Textile', pts:22, co2:2.8, desc:'Fabric, worn textiles' },
+];
+
+const DROPS = [
+  { name:'Dharavi Green Hub', addr:'Dharavi, Mumbai – 400017', dist:'1.2 km', open:true },
+  { name:'Bandra Eco Station', addr:'Turner Rd, Bandra West', dist:'3.4 km', open:true },
+  { name:'Andheri Recycle Centre', addr:'Marol, Andheri East', dist:'5.8 km', open:false },
+  { name:'Kurla Collection Point', addr:'LBS Rd, Kurla West', dist:'6.1 km', open:true },
+];
+
+// ── STATE ──
+let selectedMat = null;
+let selectedDrop = null;
+let selectedCond = 'clean';
+let uploadedFiles = [];
+let currentStep = 1;
+let userPts = 1420;
+
+// ── INIT ──
+(function init(){
+  renderMaterials();
+  renderDrops();
+  const today = new Date(); today.setDate(today.getDate()+1);
+  document.getElementById('col-date').value = today.toISOString().split('T')[0];
+  document.getElementById('col-date').min = new Date().toISOString().split('T')[0];
+})();
+
+// ── RENDER MATERIALS ──
+function renderMaterials() {
+  document.getElementById('mat-grid').innerHTML = MATERIALS.map(m => `
+    <div class="mat-tile" id="mt-${m.id}" onclick="selectMat('${m.id}')">
+      <div class="check">✓</div>
+      <div class="mat-emoji">${m.emoji}</div>
+      <div class="mat-name">${m.name}</div>
+      <div class="mat-pts">⭐ ${m.pts} pts/kg</div>
+      <div class="mat-cat">${m.cat}</div>
+    </div>
+  `).join('');
+}
+
+function selectMat(id) {
+  selectedMat = MATERIALS.find(m=>m.id===id);
+  document.querySelectorAll('.mat-tile').forEach(t=>t.classList.remove('selected'));
+  document.getElementById('mt-'+id).classList.add('selected');
+  document.getElementById('btn-step1').disabled = false;
+}
+
+// ── RENDER DROPS ──
+function renderDrops() {
+  document.getElementById('drop-grid').innerHTML = DROPS.map((d,i) => `
+    <div class="drop-card" id="dc-${i}" onclick="selectDrop(${i})">
+      <div class="dc-top">
+        <div class="dc-icon">📍</div>
+        <div class="dc-name">${d.name}</div>
+      </div>
+      <div class="dc-addr">${d.addr}</div>
+      <div class="dc-meta">
+        <span class="dc-pill ${d.open?'open':'dist'}">${d.open?'Open Now':'Closed'}</span>
+        <span class="dc-pill dist">${d.dist}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectDrop(i) {
+  selectedDrop = DROPS[i];
+  document.querySelectorAll('.drop-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('dc-'+i).classList.add('selected');
+}
+
+// ── STEPS ──
+function goStep(n) {
+  if (n===2 && !selectedMat) { toast('Please select a material first'); return; }
+  if (n===3) {
+    const qty = parseFloat(document.getElementById('qty').value);
+    if (!qty || qty < 0.5) { toast('Minimum quantity is 0.5 kg'); return; }
+  }
+  currentStep = n;
+  ['step1','step2','step3'].forEach((id,i)=>{
+    document.getElementById(id).style.display = (i+1===n)?'block':'none';
+  });
+  // update step dots
+  [1,2,3].forEach(i=>{
+    const dot = document.getElementById('sd'+i);
+    const line = document.getElementById('sl'+i);
+    dot.className = 'step-dot' + (i===n?' active':i<n?' done':'');
+    dot.textContent = i<n ? '✓' : i;
+    if(line) line.className = 'step-line' + (i<n?' done':'');
+    const lbl = document.getElementById('sl-'+i);
+    lbl.className = i===n?'active':'';
+  });
+  // progress bar
+  document.getElementById('prog-fill').style.width = (n/3*100)+'%';
+
+  if(n===2) updatePreview();
+  if(n===3) buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── PREVIEW ──
+function updatePreview() {
+  if(!selectedMat) return;
+  document.getElementById('sel-preview').innerHTML = `
+    <div style="font-size:2.2rem;">${selectedMat.emoji}</div>
+    <div class="sp-info"><h4>${selectedMat.name}</h4><p>${selectedMat.desc} · ${selectedMat.cat}</p></div>
+    <div class="sp-pts"><div class="rate">⭐ ${selectedMat.pts}</div><div class="rlbl">pts per kg</div></div>
+  `;
+  recalc();
+}
+
+function recalc() {
+  const qty = parseFloat(document.getElementById('qty').value)||0;
+  if(!selectedMat) return;
+  const condBonus = selectedCond==='clean'?1:selectedCond==='used'?0.85:0.7;
+  const photoBonus = uploadedFiles.length>0?10:0;
+  const pts = Math.round(qty * selectedMat.pts * condBonus) + photoBonus;
+  const co2 = (qty * selectedMat.co2).toFixed(1);
+  const val = Math.round(pts * 0.25);
+  document.getElementById('est-qty').textContent = qty.toFixed(1);
+  document.getElementById('est-pts').textContent = pts;
+  document.getElementById('est-co2').textContent = co2;
+  document.getElementById('est-val').textContent = '₹'+val;
+}
+
+function stepQty(d) {
+  const inp = document.getElementById('qty');
+  const v = Math.max(0.5, parseFloat(inp.value)||1) + d;
+  inp.value = v.toFixed(1);
+  recalc();
+}
+
+function setCond(el, val) {
+  selectedCond = val;
+  document.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  recalc();
+}
+
+// ── SUMMARY ──
+function buildSummary() {
+  const qty = parseFloat(document.getElementById('qty').value)||0;
+  const condBonus = selectedCond==='clean'?1:selectedCond==='used'?0.85:0.7;
+  const photoBonus = uploadedFiles.length>0?10:0;
+  const pts = Math.round(qty * selectedMat.pts * condBonus) + photoBonus;
+  const date = document.getElementById('col-date').value;
+  const time = document.getElementById('col-time').value;
+  const items = [
+    ['Material', selectedMat.emoji+' '+selectedMat.name],
+    ['Quantity', qty.toFixed(1)+' kg'],
+    ['Condition', selectedCond.charAt(0).toUpperCase()+selectedCond.slice(1)],
+    ['Date', date||'—'],
+    ['Time Slot', time||'—'],
+    ['Photos', uploadedFiles.length ? uploadedFiles.length+' uploaded (+10 pts)' : 'None'],
+    ['Est. Points', '⭐ '+pts],
+    ['Drop Point', selectedDrop ? selectedDrop.name : '—'],
+  ];
+  document.getElementById('summary-grid').innerHTML = items.map(([k,v])=>`
+    <div style="background:var(--white);border-radius:10px;padding:12px 14px;border:1px solid var(--border);">
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">${k}</div>
+      <div style="font-size:0.88rem;font-weight:700;color:var(--ink);">${v}</div>
+    </div>
+  `).join('');
+}
+
+// ── FILE UPLOAD ──
+function handleFiles(files) {
+  [...files].forEach(f => {
+    if(uploadedFiles.length>=4){toast('Max 4 photos');return;}
+    uploadedFiles.push(f);
+    renderThumbs();
+  });
+  recalc();
+  document.querySelector('.upload-zone').classList.remove('dragging');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  handleFiles(e.dataTransfer.files);
+}
+function renderThumbs() {
+  const fp = document.getElementById('file-preview');
+  fp.innerHTML = uploadedFiles.map((f,i)=>{
+    const url = URL.createObjectURL(f);
+    return `<div class="file-thumb"><img src="${url}"><div class="rm" onclick="removeFile(${i})">✕</div></div>`;
+  }).join('');
+}
+function removeFile(i) {
+  uploadedFiles.splice(i,1);
+  renderThumbs();
+  recalc();
+}
+
+// ── SUBMIT ──
+function doSubmit() {
+  if(!selectedDrop){toast('Please choose a drop-off point');return;}
+  const btn = document.getElementById('btn-submit');
+  const spin = document.getElementById('submit-spin');
+  const txt = document.getElementById('btn-submit-txt');
+  btn.disabled = true; spin.style.display='inline-block'; txt.textContent='Submitting…';
+
+  setTimeout(()=>{
+    const qty = parseFloat(document.getElementById('qty').value)||0;
+    const condBonus = selectedCond==='clean'?1:selectedCond==='used'?0.85:0.7;
+    const photoBonus = uploadedFiles.length>0?10:0;
+    const pts = Math.round(qty * selectedMat.pts * condBonus) + photoBonus;
+    const id = 'HY-' + 'MUM' + '-' + String(Math.floor(1000+Math.random()*9000));
+
+    document.getElementById('step3').style.display='none';
+    const ss = document.getElementById('success-screen');
+    ss.classList.add('show');
+    document.getElementById('tracking-id').textContent = id;
+    document.getElementById('pts-earned').textContent = pts.toLocaleString('en-IN');
+    document.getElementById('tl').innerHTML = `
+      <div class="tl-item tl-done"><div class="tl-dot"></div><div class="tl-text"><strong>Submission Registered</strong><span>Just now · ${id}</span></div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--border)"></div><div class="tl-text"><strong>Drop-off Required</strong><span>${selectedDrop.name}</span></div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--border)"></div><div class="tl-text"><strong>Verification Pending</strong><span>Usually within 24 hrs</span></div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--border)"></div><div class="tl-text"><strong>Points Credited</strong><span>+${pts} pts → your wallet</span></div></div>
+    `;
+    userPts += pts;
+    document.getElementById('nav-pts').textContent = userPts.toLocaleString('en-IN');
+    window.scrollTo({top:0,behavior:'smooth'});
+    toast('🎉 +'+pts+' points queued!');
+  }, 1400);
+}
+
+function newSubmission() {
+  selectedMat=null; selectedDrop=null; selectedCond='clean'; uploadedFiles=[];
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('step1').style.display='block';
+  document.querySelectorAll('.mat-tile').forEach(t=>t.classList.remove('selected'));
+  document.querySelectorAll('.drop-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('file-preview').innerHTML='';
+  document.getElementById('qty').value='1.0';
+  document.getElementById('btn-step1').disabled=true;
+  document.getElementById('btn-submit').disabled=false;
+  document.getElementById('submit-spin').style.display='none';
+  document.getElementById('btn-submit-txt').textContent='✅ Confirm Submission';
+  goStep(1);
+}
+
+function goBack() { toast('Redirecting to dashboard…'); }
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+</script>
+</body>
+</html>
